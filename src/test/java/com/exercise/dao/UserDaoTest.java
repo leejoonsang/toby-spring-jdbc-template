@@ -22,12 +22,20 @@ class UserDaoTest {
     @Autowired
     ApplicationContext context;
 
-
-
     UserDao userDao = new UserDao();
     User user1 = new User("20", "mark20", "twenty");
     User user2 = new User("21", "mark21", "twentyone");
     User user3 = new User("22", "mark22", "twentytwo");
+
+    @Test
+    void addAndGet() throws SQLException {
+        UserDao userDao = context.getBean("awsUserDao", UserDao.class);
+        userDao.add(user2);
+
+        User selectedUser = userDao.findById(user2.getId());
+        assertEquals("mark21", selectedUser.getName());
+        assertEquals("twentyone", selectedUser.getPassword());
+    }
 
     @Test
     @DisplayName("insert and select test passed.")
