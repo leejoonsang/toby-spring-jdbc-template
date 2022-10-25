@@ -19,17 +19,22 @@ public class UserDao {
     }
 
     public void add(User user) throws SQLException {
-        Connection conn = connectionMaker.makeConnection();
-        PreparedStatement pstmt = conn.prepareStatement(
-                "INSERT INTO users(id, name, password) values (?, ?, ?)");
-        pstmt.setString(1, user.getId());
-        pstmt.setString(2, user.getName());
-        pstmt.setString(3, user.getPassword());
+        AddStrategy addStrategy = new AddStrategy(user);
 
-        pstmt.executeUpdate();
+        PreparedStatement pstmt = null;
+        Connection conn = null;
+        try {
+            conn = connectionMaker.makeConnection();
+            pstmt = new AddStrategy(user).makePreparedStatement(conn);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            pstmt.close();
+            conn.close();
+        }
 
-        pstmt.close();
-        conn.close();
+
     }
 
     public User findById(String id) throws SQLException {
@@ -61,7 +66,7 @@ public class UserDao {
         try {
 
             conn = connectionMaker.makeConnection();
-            pstmt = conn.prepareStatement("delete from users");
+            pstmt = new DeleteAllStrategy().makePreparedStatement(conn);
             pstmt.executeUpdate();
 
         } catch (SQLException e) {
